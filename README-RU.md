@@ -22,9 +22,7 @@
 ### Установка
 
 1. **Требования**:
-   - Python 3.8+
-   - Flask (`pip install flask`)
-   - Для отображения `README.md`: `pip install python-markdown`
+   - Python 3.12+
 
 2. **Клонируйте репозиторий**:
    ```bash
