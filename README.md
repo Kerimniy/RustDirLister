@@ -22,9 +22,7 @@
 ### Installation
 
 1. **Requirements**:
-   - Python 3.8+
-   - Flask (`pip install flask`)
-   - For `README.md` rendering: `pip install python-markdown`
+   - Python 3.12+
 
 2. **Clone the repository**:
    ```bash
