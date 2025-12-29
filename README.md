@@ -1,15 +1,12 @@
-<p align="center">
-<img src="https://github.com/Kerimniy/RustDirLister/blob/main/for_readme/full-logo.webp" alt="logo" width="66%">
-</p>
 
-**На русском тута ->** <a href="https://github.com/Kerimniy/RustDirLister/blob/main/README-RU.md">тык</a>
+**На русском тута ->** <a href="https://github.com/Kerimniy/RustDirLister/blob/v0.2-pre/README-RU.md">тык</a>
 
 # RustDirLister
 
 **RustDirLister** is a lightweight web application built with Rust and Axum that provides an interface for browsing the contents of directories on a server. The project allows displaying files and folders with sorting, icons, and basic navigation, and supports customization of the starting directory and service name.
 
 <p align="center">
-<img src="https://github.com/Kerimniy/FlaskDirLister/blob/main/for_readme/preview.png" alt="logo" width="90%">
+<img src="https://github.com/Kerimniy/RustDirLister/blob/v0.1/for_readme/preview.png" alt="logo" width="90%">
 </p>
 
 ### Key Features
