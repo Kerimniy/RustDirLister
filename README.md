@@ -17,7 +17,6 @@
 - Support for folder navigation via the web interface.
 - **Display of `README.md`**: If a `README.md` file exists in the directory, its contents are displayed at the top of the page.
 - Configurable starting directory via the `PATH` variable.
-- Custom service name via the `SERVICENAME` variable (defaults to the server domain).
 
 ## Configure the application:
 
