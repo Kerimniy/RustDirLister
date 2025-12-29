@@ -1,0 +1,188 @@
+:root {
+    --bg-body: #131313;
+    --bg-main: #252525;
+    --bg-input: rgba(158, 152, 152, 0.1);
+    --bg-submit: linear-gradient(to right, #333333, #494949);
+    --bg-toast: #b83f49;
+
+    --text-sign: #dfdfdf;
+    --text-input: #dfdfdf;
+    --text-submit: #fff;
+    --text-forgot: #E1BEE7;
+    --text-toast: #e4e4e4;
+
+    --link-color: #E1BEE7;
+
+    --border-input: rgba(0,0,0,0.02);
+    --border-input-focus: rgba(0,0,0,0.18);
+    --border-toast: #f5c6cb;
+
+    --shadow-main: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+    --shadow-submit: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+    --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-forgot: 0px 0px 3px rgba(117, 117, 117, 0.12);
+    --shadow-link: 0px 0px 3px rgba(117, 117, 117, 0.12);
+    --shadow-header: rgba(0,0,0,0.5);
+}
+
+body.light {
+    --bg-body: #ffffff;
+    --bg-main: #f8f9fa;
+    --bg-input: rgba(136, 136, 136, 0.04);
+    --bg-submit: linear-gradient(to right, #ced4da, #adb5bd);
+    --bg-toast: #f8d7da;
+
+    --text-sign: #212529;
+    --text-input: #495057;
+    --text-submit: #212529;
+    --text-forgot: #6f42c1;
+    --text-toast: #721c24;
+
+    --link-color: #007bff;
+
+    --border-input: rgba(0,0,0,0.1);
+    --border-input-focus: #80bdff;
+    --border-toast: #f5c6cb;
+
+    --shadow-main: 0px 11px 35px 2px rgba(0, 0, 0, 0.05);
+    --shadow-submit: 0 0 20px 1px rgba(0, 0, 0, 0.02);
+    --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-forgot: 0px 0px 3px rgba(0, 0, 0, 0.05);
+    --shadow-link: 0px 0px 3px rgba(0, 0, 0, 0.05);
+    --shadow-header: rgba(0,0,0,0.1);
+}
+
+    
+    body {
+    background-color: var(--bg-body);
+    font-family: 'Ubuntu', sans-serif;
+}
+
+.main {
+    background-color: var(--bg-main);
+    width: 30vh;
+    height: 35vh;
+    margin: 7em auto;
+    border-radius: 1.5em;
+    box-shadow: var(--shadow-main);
+}
+
+.sign {
+    padding-top: 40px;
+    color: var(--text-sign);
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: bold;
+    font-size: 23px;
+}
+
+.un {
+width: 75%;
+color: var(--text-input);
+font-weight: 700;
+font-size: 14px;
+letter-spacing: 1px;
+background: var(--bg-input);
+padding: 10px 20px;
+border: none;
+border-radius: 20px;
+box-sizing: border-box;
+border: 2px solid var(--border-input);
+text-align: center;
+
+    margin-bottom: 1.5vh;
+}
+
+.form1{
+    padding-top: 2vh;
+    display: flex;
+    flex-wrap: wrap !important;
+    flex-direction: column;
+    align-content: center;
+}
+
+
+.un:focus, .pass:focus {
+    border: 2px solid var(--border-input-focus) !important;
+    
+}
+
+.submit {
+  cursor: pointer;
+    border-radius: 5em;
+    color: var(--text-submit);
+    background: var(--bg-submit);
+    border: 0;
+    margin-top: 0.25vh;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    font-size: 13px;
+    margin-bottom: 1vh;
+    box-shadow: var(--shadow-submit);
+}
+
+.forgot {
+    text-shadow: var(--shadow-forgot);
+    color: var(--text-forgot);
+    padding-top: 15px;
+}
+
+a {
+    text-shadow: var(--shadow-link);
+    color: var(--link-color);
+    text-decoration: none
+}
+
+@media (max-width: 600px) {
+    .main {
+         width: 80vw;
+    height: 35vh;
+    }
+    
+  }
+
+
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+}
+
+.toast {
+    min-width: 300px;
+    max-width: 400px;
+    background-color: var(--bg-toast);   
+    color: var(--text-toast);               
+    border: 1px solid var(--border-toast);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: var(--shadow-toast);
+    opacity: 0;                   
+    transform: translateX(100%);  
+    transition: all 0.4s ease;      
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);       
+}
+
+.toast-close {
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 20px;
+    opacity: 0.7;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
