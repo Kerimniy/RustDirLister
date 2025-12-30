@@ -115,6 +115,9 @@ async fn search(rsp: &mut HashMap<String,ElementInfo>,files: &mut HashMap<String
 
         let file_name = entry.file_name();
         let name = file_name.to_string_lossy();
+        if name.as_bytes().first() == Some(&b'.') {
+            continue;
+        }
         let size = metadata.len();
         if metadata.is_file() {
             let eli = ElementInfo{
@@ -145,6 +148,11 @@ async fn search(rsp: &mut HashMap<String,ElementInfo>,files: &mut HashMap<String
 async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum::body::Body>) -> impl IntoResponse {
 
     let path_raw =percent_encoding::percent_decode_str(uri.path()).decode_utf8().unwrap().to_string();
+    //println!("{}",path_raw);
+    if path_raw.contains("../") {
+        return (StatusCode::NOT_FOUND).into_response();
+    }
+
     let path = path_raw.trim_matches('/');
     if path.starts_with("rdl_static"){
         let file_path = std::path::Path::new(path);
@@ -218,12 +226,18 @@ async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum
 
     let file_path = SERVING_PATH.join(path);
 
+    if file_path.file_name().unwrap_or(OsStr::new(".")).to_string_lossy().as_bytes().first() == Some(&b'.') {
+        let header = [
+            (header::CONTENT_TYPE, "text/html".to_owned()),
+        ];
+        let tmpl = IndexTemplate{dirs: "{}".to_string(),md: String::new() , files: "{}".to_string()}.render().unwrap_or(String::new());
+        return (header, tmpl).into_response();
+    }
 
     let metadata = match tokio::fs::metadata(&file_path).await  {
         Ok(metadata) => metadata,
         Err(_) => { let header = [
             (header::CONTENT_TYPE, "text/html".to_owned()),
-            (header::WWW_AUTHENTICATE, r#"Basic realm="Restricted""#.to_string())
         ]; let tmpl = IndexTemplate{dirs: "{}".to_string(),md: String::new() , files: "{}".to_string()}.render().unwrap_or(String::new()); return (header, tmpl).into_response()},
     };
 
@@ -262,6 +276,11 @@ async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum
 
             let file_name = entry.file_name();
             let name = file_name.to_string_lossy();
+
+            if name.as_bytes().first() == Some(&b'.') {
+                continue;
+            }
+
             if md_found == false && name == "README.md" {
                 let mut md_cache_h = MD_CACHE.lock().await;
                 let c_md_info = md_cache_h.get(&inner_path.to_string_lossy().to_string());
@@ -313,7 +332,6 @@ async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum
 
         let header = [
             (header::CONTENT_TYPE, "text/html".to_owned()),
-            (header::WWW_AUTHENTICATE, r#"Basic realm="Restricted""#.to_owned()),
         ];
         let tmpl = IndexTemplate{dirs: dirs_json,md: md_source.to_string() , files: files_json}.render().unwrap_or(String::new());
         (header, tmpl).into_response()
