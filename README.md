@@ -1,7 +1,12 @@
 
-**На русском тута ->** <a href="https://github.com/Kerimniy/RustDirLister/blob/v0.2-pre/README-RU.md">тык</a>
 
 # RustDirLister
+
+## Changes
+
+- UI fixes
+- askama replaced with tera, so you can modify html without rebuild 
+
 
 **RustDirLister** is a lightweight web application built with Rust and Axum that provides an interface for browsing the contents of directories on a server. The project allows displaying files and folders with sorting, icons, and basic navigation, and supports customization of the starting directory and service name.
 
