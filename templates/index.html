@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<meta name="yandex-verification" content="c6768b6a3b7462a3" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <meta http-equiv="preload">
-    <title>JS</title>	
+    <title>Loading...</title>	
     <meta name="description" content="DirectoryLister">
     <meta name="robots" content="index, follow"/>
     <link rel="icon" type="image/x-icon" href="/rdl_static/resource/logo.webp"> 
@@ -13,12 +14,12 @@
 </head>
 
 <body style="background-color: var(--bg); margin:auto" data-theme="dark">
-    <div style="width: 100%;  height: 10vh; padding: auto; margin: 0%; position: relative; top: 0vh; display: block; background-color: var(--dc);">
+    <div style="width: 100%; height: 10vh; padding: 1rem 2rem;box-sizing: border-box; position: relative;display: flex; flex-direction: row; justify-content: space-between; align-items: center; background-color: var(--dc);">
       
-      <div style="width: 4.5vh; height: 4.5vh; position: relative; top: 2.5vh; left: 15%;"><a href="/"><img style="width: 100%;" src="/rdl_static/resource/logo.webp" ></a> </div>  
+      <div style="width: 4.5vh; height: 4.5vh; position: relative;"><a href="/"><img style="width: 100%;" src="/rdl_static/resource/logo.webp" ></a> </div>  
       
       <input id="query" class="input" type="text" placeholder="Search..." name="searchbar"/>
-      <label for="toggle" style="cursor: pointer;position: relative; top: -2.0vh; left: 71.5%;">
+      <label for="toggle" style="cursor: pointer;position: relative;">
           <input type="checkbox" name="toggle" id="toggle" style="display: none;">
           <div class="togglebuttonBg">
               <div class="togglebuttonSl"></div>
@@ -35,7 +36,7 @@
                 <span class="mdreadme">README.md</span>
             </div>
             <div id="mdcontent" class="mdcontent">
-                fjfjfj
+                Loading... Is md here?
             </div>
         </div>
         
@@ -48,18 +49,48 @@
     </div>
 
     <div style="position: relative; bottom: 0%; margin: 0%;  width: 60%;margin-top: 5vh; height: 10vh; left: 50%; border-top: var(--footertext) solid 0.2vh;  transform: translateX(-50%);">
-        <p style="text-align: center; font-size: 2vh; color: var(--footertext);">RustDirLister-v0.2-pre1</p>
+        <p style="text-align: center; font-size: 2vh; color: var(--footertext);">RustDirLister-v0.2</p>
     </div>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
+    const b = document.body;
+    b.dataset.theme = getThemeCookie();
+    setThemeCookie(b.dataset.theme);
+    var checkbox = document.getElementById("toggle");
+    let st = true;
+    if (b.dataset.theme=="light"){
+      st=false;
+    }
+    checkbox.checked = st;
+
+    checkbox.addEventListener('change', function() {toggleTheme();})
+    function toggleTheme() {
+      
+      b.dataset.theme = b.dataset.theme === "light" ? "dark" : "light";
+      setThemeCookie(b.dataset.theme);
+    }
+    function setThemeCookie(theme) {
+      const days = 30;
+      const expires = new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie = `theme=${theme}; expires=${expires}; path=/`;
+    }
+    function getThemeCookie() {
+      const match = document.cookie.match(/(^|;) ?theme=([^;]*)/);
+      return match ? match[2] : "dark";
+    }
+
+
+</script>
+
+<script>
 
     let md = `{{ md }}`
 
-    let dirs_json = ("{{ dirs }}").replace(/&#34;/g, '"')
-    let files_json = ("{{ files }}").replace(/&#34;/g, '"')
+    let dirs_json = (`{{ dirs | safe }}`).replace(/&#34;/g, '"')
+    let files_json = (`{{ files | safe }}`).replace(/&#34;/g, '"')
 
     let dirs = JSON.parse(dirs_json)
     let files = JSON.parse(files_json)
@@ -224,5 +255,7 @@ function addNewEl(data){
 }
 
 </script>
+
+
 
 </html>

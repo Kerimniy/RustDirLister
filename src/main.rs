@@ -4,7 +4,6 @@ use axum::{http::{StatusCode}, RequestExt};
 use axum::{response::IntoResponse, routing::{get,post}, Router, extract::{Query, Json}};
 use axum::body::Body;
 use tokio::fs::File;
-use askama;
 use tokio_util::io::ReaderStream;
 use hyper::header;
 
@@ -15,7 +14,6 @@ use serde_json;
 use serde::Serialize;
 
 use std::time::{Duration, SystemTime};
-use askama::Template;
 use chrono::prelude::DateTime;
 use chrono::Local;
 
@@ -31,21 +29,19 @@ use std::default::Default;
 use std::io::Write;
 use axum::response::Redirect;
 use walkdir::WalkDir;
+use tokio::sync::OnceCell;
+
+use tera::{Tera, Context};
 
 
 use rand::random;
 use tower_cookies::cookie::SameSite;
 
 static SECRET_KEY: Lazy<tower_cookies::cookie::Key> = Lazy::new(||Key::from(&read_secret_key(".SECRETKEY")));
+static TERA: OnceCell<Tera> = OnceCell::const_new();
 
 
-#[derive(askama::Template)]
-#[template(path = "index.html")]
-struct IndexTemplate {
-    dirs: String,
-    files: String,
-    md: String
-}
+
 
 #[derive(Debug, Serialize)]
 struct ElementInfo{
@@ -146,7 +142,7 @@ async fn search(rsp: &mut HashMap<String,ElementInfo>,files: &mut HashMap<String
 
 }
 async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum::body::Body>) -> impl IntoResponse {
-
+    let tera = get_tera().await;
     let path_raw =percent_encoding::percent_decode_str(uri.path()).decode_utf8().unwrap().to_string();
     //println!("{}",path_raw);
     if path_raw.contains("../") {
@@ -217,8 +213,20 @@ async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum
         let header = [
             (header::CONTENT_TYPE, "text/html".to_owned()),
         ];
-        let tmpl = IndexTemplate{dirs: dirs_json,md: "".to_string() , files: files_json}.render().unwrap_or(String::new());
-        return  (header, tmpl).into_response()
+
+
+        let st: StatusCode;
+        let mut context = tera::Context::new();
+        context.insert("dirs", &dirs_json);
+        context.insert("md", "");
+        context.insert("files", &files_json);
+
+        let rendered = match tera.render("index.html", &context){
+            Ok(r)=>{st=StatusCode::OK; r},
+            Err(_)=>{st=StatusCode::INTERNAL_SERVER_ERROR;"500".to_string()}
+        };
+
+        return (st,axum::response::Html(rendered)).into_response()
     }
     let md_found = false;
     let mut md_source: String= "".to_string();
@@ -227,18 +235,44 @@ async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum
     let file_path = SERVING_PATH.join(path);
 
     if file_path.file_name().unwrap_or(OsStr::new(".")).to_string_lossy().as_bytes().first() == Some(&b'.') {
-        let header = [
-            (header::CONTENT_TYPE, "text/html".to_owned()),
-        ];
-        let tmpl = IndexTemplate{dirs: "{}".to_string(),md: String::new() , files: "{}".to_string()}.render().unwrap_or(String::new());
-        return (header, tmpl).into_response();
+
+
+        let st: StatusCode;
+        let mut context = tera::Context::new();
+        context.insert("dirs", "{}");
+        context.insert("md", "");
+        context.insert("files", "{}");
+
+        let rendered = match tera.render("index.html", &context){
+            Ok(r)=>{st=StatusCode::OK; r},
+            Err(_)=>{st=StatusCode::INTERNAL_SERVER_ERROR;"500".to_string()}
+        };
+
+        return (st,axum::response::Html(rendered)).into_response()
     }
 
     let metadata = match tokio::fs::metadata(&file_path).await  {
         Ok(metadata) => metadata,
-        Err(_) => { let header = [
-            (header::CONTENT_TYPE, "text/html".to_owned()),
-        ]; let tmpl = IndexTemplate{dirs: "{}".to_string(),md: String::new() , files: "{}".to_string()}.render().unwrap_or(String::new()); return (header, tmpl).into_response()},
+        Err(_) => {
+            let st: StatusCode;
+            let mut context = tera::Context::new();
+            context.insert("dirs", "{}");
+            context.insert("md", "");
+            context.insert("files", "{}");
+
+            let rendered = match tera.render("index.html", &context) {
+                Ok(r) => {
+                    st = StatusCode::OK;
+                    r
+                },
+                Err(_) => {
+                    st = StatusCode::INTERNAL_SERVER_ERROR;
+                    "500".to_string()
+                }
+            };
+
+            return (st, axum::response::Html(rendered)).into_response()
+        }
     };
 
 
@@ -330,11 +364,19 @@ async fn handle(OriginalUri(uri): OriginalUri, request: axum::http::Request<axum
         let dirs_json = serde_json::to_string(&rsp).unwrap_or_default();
         let files_json = serde_json::to_string(&files).unwrap_or_default();
 
-        let header = [
-            (header::CONTENT_TYPE, "text/html".to_owned()),
-        ];
-        let tmpl = IndexTemplate{dirs: dirs_json,md: md_source.to_string() , files: files_json}.render().unwrap_or(String::new());
-        (header, tmpl).into_response()
+
+        let st: StatusCode;
+        let mut context = tera::Context::new();
+        context.insert("dirs", &dirs_json);
+        context.insert("md", &md_source);
+        context.insert("files", &files_json);
+
+        let rendered = match tera.render("index.html", &context){
+            Ok(r)=>{st=StatusCode::OK; r},
+            Err(_)=>{st=StatusCode::INTERNAL_SERVER_ERROR;"500".to_string()}
+        };
+
+        return (st,axum::response::Html(rendered)).into_response()
 
     }
 
@@ -367,11 +409,17 @@ async fn login(request: axum::http::Request<axum::body::Body>)-> impl IntoRespon
 }
 
 async fn render_login() -> impl IntoResponse{
-    let header = [
-        (header::CONTENT_TYPE, "text/html".to_owned()),
-    ];
-    let tmpl = LOGIN_TMPL.as_str();
-    (header, tmpl).into_response()
+    let tera = get_tera().await;
+
+    let st: StatusCode;
+    let context = tera::Context::new();
+
+    let rendered = match tera.render("login.html", &context){
+        Ok(r)=>{st=StatusCode::OK; r},
+        Err(_)=>{st=StatusCode::INTERNAL_SERVER_ERROR;"500".to_string()}
+    };
+
+    return (st,axum::response::Html(rendered)).into_response()
 }
 
 fn create_file_if_not_exists(path: &str, default: &str){
@@ -418,10 +466,16 @@ async fn main() {
     let state = AppState {
         key: Key::generate(),
     };
-    let app = Router::new().route("/login",get(render_login)).route("/-/api/login",post(login)).route("/{*path}", get(handle)).route("/", get(handle)).with_state(state).layer(CookieManagerLayer::new());
+    let app = Router::new()
+        .route("/login",get(render_login))
+        .route("/-/api/login",post(login))
+        .route("/{*path}", get(handle))
+        .route("/", get(handle)).with_state(state).layer(CookieManagerLayer::new());
 
 
     let host = HOST.clone();
+
+    println!("Listening on {}", host);
 
     let listener = tokio::net::TcpListener::bind(host).await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -453,4 +507,10 @@ fn read_secret_key(path: &str) -> [u8;64]{
     }
 
     key
+}
+
+pub async fn get_tera() -> &'static Tera {
+    TERA.get_or_init(|| async {
+        Tera::new("templates/**/*").unwrap()
+    }).await
 }

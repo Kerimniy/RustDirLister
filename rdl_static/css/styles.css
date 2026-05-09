@@ -73,22 +73,19 @@
     .input {
   font-family: "Montserrat", sans-serif;
   width: 40%;
-  height: 50%;
-  position: absolute;
+  position: relative;
   font-size: 2vh;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
+ 
   box-shadow: 0 0 0 1.5px var(--line), 0 0 25px -17px #000;
   border: 0;
+  height: 2rem;
   border-radius: 1.5vh;
   background-color: var(--input);
   outline: none;
   color: #bdbecb;
   cursor: text;
   z-index: 0;
-  padding-left: 1%;  
-
+  padding: 0.5rem 1rem;
 }
 
 .input::placeholder {
@@ -99,9 +96,6 @@
   box-shadow: 0 0 0 2.5px var(--line), 0px 0px 25px -15px #000;
 }
 
-.input:active {
-  transform: scale(0.999) translate(-50%,-50%);;
-}
 
 .input:focus {
   box-shadow: 0 0 0 2.5px var(--line);
@@ -260,8 +254,7 @@ body{
         transition:  top 0.15s ease, background-color 0.15s ease;
     }
     #toggle:checked + .togglebuttonBg .togglebuttonSl {
-        top: 100%;
-        transform: translateY(-100%);
+        transform: translateY(100%);
         background: var(--lamp-icon);
         filter: invert(0) sepia(100%);
         background-color: rgb(255, 255, 255); 
@@ -273,12 +266,12 @@ body{
     }
 
     .mdblock{
-      position: relative; left: 50%; background: var(--readme-c); transform: translateX(-50%); width: 95%; border-radius: 4vh; margin-bottom: 4vh;
+      position: relative; left: 50%; background: var(--readme-c); transform: translateX(-50%); width: 95%; border-radius: 1.5rem; margin-bottom: 4vh;
 
     }
     .mdlabel{
-      height: 5vh; border-top-left-radius: 4vh; border-top-right-radius: 4vh; position: relative; top: 0vh;vertical-align: middle; padding: 3vh; padding-bottom: 0; line-height: 1; background-color: var(--readme-h);
+      height: 5vh; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; position: relative; top: 0vh;vertical-align: middle; padding: 3vh; padding-bottom: 0; line-height: 1; background-color: var(--readme-h);
     }
     .mdcontent{
-      position: relative; padding: 2vh;padding-left: 2vw;padding-right: 2vw;padding-bottom: 3vh; width: auto; left: 50%; transform: translateX(-50%);
+      position: relative; padding: 1.5rem 3rem; width: auto; left: 50%; transform: translateX(-50%);
     }

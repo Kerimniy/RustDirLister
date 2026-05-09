@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta name="yandex-verification" content="c6768b6a3b7462a3" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="preload">
+    <title>Loading...</title>	
+    <meta name="description" content="DirectoryLister">
+    <meta name="robots" content="index, follow"/>
+    <link rel="icon" type="image/x-icon" href="/rdl_static/resource/logo.webp"> 
+    <link href="/rdl_static/css/styles.css" rel="stylesheet">
+	<script defer src="/rdl_static/js/script.js"></script>
+</head>
+
+<body style="background-color: var(--bg); margin:auto" data-theme="dark">
+    <div style="width: 100%; height: 10vh; padding: 1rem 2rem;box-sizing: border-box; position: relative;display: flex; flex-direction: row; justify-content: space-between; align-items: center; background-color: var(--dc);">
+      
+      <div style="width: 4.5vh; height: 4.5vh; position: relative;"><a href="/"><img style="width: 100%;" src="/rdl_static/resource/logo.webp" ></a> </div>  
+      
+      <input id="query" class="input" type="text" placeholder="Search..." name="searchbar"/>
+      <label for="toggle" style="cursor: pointer;position: relative;">
+          <input type="checkbox" name="toggle" id="toggle" style="display: none;">
+          <div class="togglebuttonBg">
+              <div class="togglebuttonSl"></div>
+          </div>
+      </label>   
+    </div>
+    <div style="width: 100%; height: 5vh; padding: auto; margin-bottom: 2%; position: relative; top: 0%; border-top: var(--line) solid 0.25vh;  display: block; background-color: var(--dc);">
+        <div id="navigation" style="font-size: 2vh; position: relative; margin-left: 10%; top: 50%; width: 85%; padding-bottom: 1vh; transform: translateY(-50%);"><a href="/">home</a>/</div>
+    </div>
+
+    <div id="content" style="width: 95%; position: relative; left: 50%; min-height: 65vh; transform: translateX(-50%);">
+       <div class="mdblock">
+            <div class="mdlabel">
+                <span class="mdreadme">README.md</span>
+            </div>
+            <div id="mdcontent" class="mdcontent">
+                Loading... Is md here?
+            </div>
+        </div>
+        
+        <div class="grid" style="padding-bottom: 1%; !important; background: none; !important;">
+            <div></div>
+            <div>Name</div>
+            <div style="text-align: right; margin-right: 10%;">Date</div>
+            <div style="text-align: right; margin-right: 10%;">Size</div>
+        </div>
+    </div>
+
+    <div style="position: relative; bottom: 0%; margin: 0%;  width: 60%;margin-top: 5vh; height: 10vh; left: 50%; border-top: var(--footertext) solid 0.2vh;  transform: translateX(-50%);">
+        <p style="text-align: center; font-size: 2vh; color: var(--footertext);">RustDirLister-v0.2</p>
+    </div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+    const b = document.body;
+    b.dataset.theme = getThemeCookie();
+    setThemeCookie(b.dataset.theme);
+    var checkbox = document.getElementById("toggle");
+    let st = true;
+    if (b.dataset.theme=="light"){
+      st=false;
+    }
+    checkbox.checked = st;
+
+    checkbox.addEventListener('change', function() {toggleTheme();})
+    function toggleTheme() {
+      
+      b.dataset.theme = b.dataset.theme === "light" ? "dark" : "light";
+      setThemeCookie(b.dataset.theme);
+    }
+    function setThemeCookie(theme) {
+      const days = 30;
+      const expires = new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie = `theme=${theme}; expires=${expires}; path=/`;
+    }
+    function getThemeCookie() {
+      const match = document.cookie.match(/(^|;) ?theme=([^;]*)/);
+      return match ? match[2] : "dark";
+    }
+
+
+</script>
+
+<script>
+
+    let md = `{{ md }}`
+
+    let dirs_json = (`{{ dirs | safe }}`).replace(/&#34;/g, '"')
+    let files_json = (`{{ files | safe }}`).replace(/&#34;/g, '"')
+
+    let dirs = JSON.parse(dirs_json)
+    let files = JSON.parse(files_json)
+    dirs = sortDict(dirs)
+    files = sortDict(files)
+    
+
+
+function sortDict(dict){
+    let keys = Object.keys(dict); 
+    keys.sort(); 
+    let newd = {};
+    for (var i=0; i<keys.length; i++) { 
+        var key = keys[i];
+        var value = dict[key];
+        newd[key] = value
+    } 
+
+    return newd
+
+}
+let path =trimSlashes(window.location.pathname.trim())
+let content = document.getElementById("content")
+let navigation = document.getElementById("navigation")
+let mdcontent = document.getElementById("mdcontent")
+
+if (md.trim() == ""){
+    mdcontent.parentElement.remove()
+}
+
+mdcontent.innerHTML = marked.parse(
+  md.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/,"")
+)
+let e = "/"
+let path_el = path.split("/")
+let i =0
+for (el of path_el){
+    if (el==="/"|| el===""||el===" "){
+        document.title = "Home"
+        continue
+    }
+    e+=el+"/"
+    let a = document.createElement("a")
+    a.href = e
+    navigation.appendChild(a)
+    a.innerText=decodeURI(el).replace('%23','#')
+    navigation.append("/")
+
+    if (i==path_el.length-1){
+        document.title =decodeURI(el).replace('%23','#') 
+    }
+    i++
+}
+
+
+
+    const KIB = 1024*1024
+    const MIB = KIB*1024
+    const GIB = MIB*1024
+    const TIB = GIB*1024
+
+for (let [key, value] of Object.entries(dirs)) {
+    addNewEl({ key, value })
+}
+
+for (let [key, value] of Object.entries(files)) {
+    addNewEl({ key, value })
+}
+function trimSlashes(str) {
+    return str.replace(/^\/+|\/+$/g, '');
+}
+function addNewEl(data){
+
+
+    let a = document.createElement("a")
+    if (path==""){
+        a.href = ("/"+data.key).replace(/#/g, '%23')
+    }
+    else{
+        a.href = (`/${path}/${data.key}`).replace(/#/g, '%23')
+    }
+    let div = document.createElement("div")
+    div.classList.add("grid")
+    let type_div = document.createElement("div")
+    let span = document.createElement("span")
+    if (data.value["el_type"]=="Dir"){
+        span.classList.add("folder")
+    }
+    else{
+        let ext = data.key.split(".")
+        if (ext.length>1){
+            ext = ext[ext.length-1]
+        }
+        else{
+            ext = ""
+        }
+
+        if (ext=="md"||ext=="markdown"){
+            span.classList.add("mdfile")
+        }
+        else if (ext=="iso"||ext=="bin"){
+            span.classList.add("iso")
+        }
+        else if (ext=="tar"||ext=="gzip"||ext=="gz"||ext=="zip"||ext=="xz"||ext=="7z"||ext=="rar"){
+            span.classList.add("zip")
+        }
+        else{
+             span.classList.add("file")
+        }
+    }
+    type_div.appendChild(span)
+    div.classList.add("grid")
+
+    let name_div = document.createElement("div")
+    name_div.innerText = data.key
+
+    
+    let lmod_div = document.createElement("div")
+    if (data.value["el_type"]!="Dir"){
+        lmod_div.innerText = data.value["modified"]
+    }
+    else{
+        lmod_div.innerText = "____"
+    }
+    lmod_div.style.textAlign = "right"
+    lmod_div.style.marginRight = "10%"
+
+    let size_div = document.createElement("div")
+    if (data.value["el_type"]!="Dir"){
+        let size = Number(data.value["size"])
+
+        let sizeStr
+
+
+        if (size<1024){
+            sizeStr = `${size} B`
+        }
+        else if (size>=1024 && size<KIB){
+            sizeStr = `${Math.round(size/1024*10)/10} KiB`
+        }
+        else if (size>=KIB && size<MIB){
+            sizeStr = `${Math.round(size/KIB*10)/10} MiB`
+        }
+        else if (size>=MIB && size<TIB){
+            sizeStr = `${Math.round(size/ MIB*10)/10} GiB`
+        }
+
+        size_div.innerText = sizeStr
+    }
+    else{
+        size_div.innerText = "____"
+    }
+    size_div.style.textAlign = "right"
+    size_div.style.marginRight = "10%"
+
+    div.appendChild(type_div)
+    div.appendChild(name_div)
+    div.appendChild(lmod_div)
+    div.appendChild(size_div)
+    a.appendChild(div)
+    content.appendChild(a)
+}
+
+</script>
+
+
+
+</html>
